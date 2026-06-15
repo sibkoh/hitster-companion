@@ -80,6 +80,11 @@ function setupGame() {
 
         if (trackId && !currentTrivia) {
             currentTrivia = DataManager.getTriviaByTrackId(trackId);
+            
+            // Fallback para pruebas: Si la canción escaneada no está en el JSON, mostramos una genérica.
+            if (!currentTrivia) {
+                currentTrivia = "Dato curioso (Prueba): ¡Temazo! Añade tu anécdota real en el Gestor de Tarjetas vinculando el Track ID: " + trackId;
+            }
         }
 
         if (!trackId) {
