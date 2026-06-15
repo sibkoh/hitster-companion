@@ -33,15 +33,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 let currentTrackId = null;
+let currentTrivia = null;
 let playbackTimeout = null;
+let currentSegment = 0; // 0=0%, 1=25%, 2=50%
+let trackDurationMs = 0;
 
 function setupGame() {
     const gameContainer = document.getElementById('game-container');
     const statusText = document.getElementById('status-text');
+    const playbackControls = document.getElementById('playback-controls');
+    const btnStop = document.getElementById('btn-stop');
+    const btnNextSegment = document.getElementById('btn-next-segment');
     const btnReveal = document.getElementById('btn-reveal');
     const btnNext = document.getElementById('btn-next');
     const metadataDisplay = document.getElementById('metadata-display');
     const readerContainer = document.getElementById('reader-container');
+    const trackTrivia = document.getElementById('track-trivia');
 
     // Initialize player
     initializePlayer((isReady) => {
@@ -55,10 +62,15 @@ function setupGame() {
         console.log("Scanned Text:", decodedText);
         
         // 1. Check DataManager cache first
-        let trackId = DataManager.getTrackId(decodedText);
-        
-        // 2. If not in cache, fallback to checking if it's a raw Spotify URL
-        if (!trackId) {
+        let cardData = DataManager.getCardData(decodedText);
+        let trackId = null;
+        currentTrivia = null;
+
+        if (cardData && cardData.trackId) {
+            trackId = cardData.trackId;
+            currentTrivia = cardData.trivia || null;
+        } else {
+            // 2. Fallback to checking if it's a raw Spotify URL
             const regex = /(?:track\/|spotify:track:)([a-zA-Z0-9]+)/i;
             const match = decodedText.match(regex);
             if (match) trackId = match[1];
@@ -70,6 +82,7 @@ function setupGame() {
         }
 
         currentTrackId = trackId;
+        currentSegment = 0;
 
         // Pause scanning to avoid multiple triggers
         pauseScanner();
@@ -80,24 +93,66 @@ function setupGame() {
         metadataDisplay.classList.add('hidden');
         btnReveal.classList.add('hidden');
         btnNext.classList.add('hidden');
-        statusText.textContent = "Playing Blindly...";
+        playbackControls.classList.remove('hidden');
+        btnNextSegment.disabled = false;
+        
+        statusText.textContent = "Preparando pista...";
 
-        // Play the track
-        await playTrack(trackId);
+        // Fetch duration before playing
+        const metadata = await getTrackMetadata(currentTrackId);
+        if (metadata) {
+            trackDurationMs = metadata.duration_ms;
+        } else {
+            trackDurationMs = 180000; // fallback 3 mins
+        }
 
-        // Start 30s timer
+        playSegment(0);
+    }
+
+    async function playSegment(segmentIndex) {
+        if (playbackTimeout) clearTimeout(playbackTimeout);
+        
+        let positionMs = 0;
+        if (segmentIndex === 1) positionMs = Math.floor(trackDurationMs * 0.25);
+        if (segmentIndex === 2) positionMs = Math.floor(trackDurationMs * 0.50);
+
+        statusText.textContent = `Reproduciendo Tramo ${segmentIndex + 1}/3...`;
+        gameContainer.classList.add('is-playing');
+
+        await playTrack(currentTrackId, positionMs);
+
         playbackTimeout = setTimeout(() => {
-            pauseTrack();
-            statusText.textContent = "Playback Paused. Ready to Reveal?";
-            btnReveal.classList.remove('hidden');
+            stopPlayback();
         }, CONFIG.PLAYBACK_DURATION_MS);
     }
+
+    async function stopPlayback() {
+        if (playbackTimeout) clearTimeout(playbackTimeout);
+        await pauseTrack();
+        gameContainer.classList.remove('is-playing');
+        statusText.textContent = "Música Pausada.";
+        btnReveal.classList.remove('hidden');
+    }
+
+    btnStop.addEventListener('click', stopPlayback);
+
+    btnNextSegment.addEventListener('click', () => {
+        if (currentSegment < 2) {
+            currentSegment++;
+            playSegment(currentSegment);
+            if (currentSegment === 2) {
+                btnNextSegment.disabled = true;
+            }
+        }
+    });
 
     btnReveal.addEventListener('click', async () => {
         if (!currentTrackId) return;
         
+        stopPlayback();
+        playbackControls.classList.add('hidden');
         btnReveal.classList.add('hidden');
-        statusText.textContent = "Revealed!";
+        statusText.textContent = "¡Revelado!";
         
         // Fetch metadata
         const metadata = await getTrackMetadata(currentTrackId);
@@ -109,6 +164,13 @@ function setupGame() {
             }
         }
         
+        if (currentTrivia) {
+            trackTrivia.textContent = currentTrivia;
+            trackTrivia.classList.remove('hidden');
+        } else {
+            trackTrivia.classList.add('hidden');
+        }
+        
         metadataDisplay.classList.remove('hidden');
         btnNext.classList.remove('hidden');
     });
@@ -118,7 +180,9 @@ function setupGame() {
         gameContainer.classList.add('hidden');
         readerContainer.classList.remove('hidden');
         currentTrackId = null;
+        currentTrivia = null;
         if (playbackTimeout) clearTimeout(playbackTimeout);
+        gameContainer.classList.remove('is-playing');
         resumeScanner();
     });
 

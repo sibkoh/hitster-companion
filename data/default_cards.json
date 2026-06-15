@@ -1,5 +1,14 @@
 {
-  "card_001": "4cOdK2wGLETKBW3PvgPWqT",
-  "card_002": "3n3Ppam7vgaVa1iaRUc9Lp",
-  "hitster:card:001": "11dFghVXANMlKmJXsNCbNl"
+  "card_001": {
+    "trackId": "4cOdK2wGLETKBW3PvgPWqT",
+    "trivia": "Esta canción fue un éxito rotundo en la década de los 80."
+  },
+  "card_002": {
+    "trackId": "3n3Ppam7vgaVa1iaRUc9Lp",
+    "trivia": "El artista compuso este tema en menos de 15 minutos."
+  },
+  "hitster:card:001": {
+    "trackId": "11dFghVXANMlKmJXsNCbNl",
+    "trivia": "Considerada una de las mejores canciones de rock alternativo."
+  }
 }

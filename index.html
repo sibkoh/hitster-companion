@@ -32,12 +32,19 @@
         <div id="game-container" class="hidden">
             <div id="status-text" class="status-text">Ready</div>
             
+            <!-- Playback Controls -->
+            <div id="playback-controls" class="hidden" style="margin-bottom: 20px;">
+                <button id="btn-stop" class="btn" style="background-color: #ff5252; margin-right: 10px;">Parar</button>
+                <button id="btn-next-segment" class="btn">Siguiente Tramo</button>
+            </div>
+
             <button id="btn-reveal" class="btn hidden">Reveal Card</button>
             
             <div id="metadata-display" class="hidden">
                 <img id="track-cover" src="" alt="Album Cover">
                 <h2 id="track-title">Title</h2>
                 <p id="track-artist">Artist</p>
+                <p id="track-trivia" class="hidden"></p>
             </div>
             
             <button id="btn-next" class="btn hidden" style="margin-top: 20px;">Next Scan</button>

@@ -163,3 +163,24 @@ h1 {
     color: #bbb;
     margin: 0;
 }
+
+/* Animation for playing state */
+@keyframes pulseMusic {
+    0% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5); border: 1px solid transparent; }
+    50% { box-shadow: 0 4px 20px rgba(29, 185, 84, 0.5); border: 1px solid var(--accent-color); }
+    100% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5); border: 1px solid transparent; }
+}
+
+.is-playing {
+    animation: pulseMusic 2s infinite ease-in-out !important;
+}
+
+#track-trivia {
+    font-style: italic;
+    color: #ffd700; /* gold color for trivia */
+    margin-top: 15px;
+    font-size: 0.95rem;
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+}

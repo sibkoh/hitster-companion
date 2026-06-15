@@ -33,13 +33,16 @@ export function initializePlayer(onReadyCallback) {
     };
 }
 
-export async function playTrack(trackId) {
+export async function playTrack(trackId, positionMs = 0) {
     if (!deviceId || !getAccessToken()) return;
 
     const uri = `spotify:track:${trackId}`;
     await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
         method: 'PUT',
-        body: JSON.stringify({ uris: [uri] }),
+        body: JSON.stringify({ 
+            uris: [uri],
+            position_ms: positionMs
+        }),
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${getAccessToken()}`

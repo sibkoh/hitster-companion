@@ -26,7 +26,7 @@ export class DataManager {
         localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
     }
 
-    static getTrackId(scannedText) {
+    static getCardData(scannedText) {
         const data = this.getAll();
         return data[scannedText] || null;
     }
@@ -72,13 +72,14 @@ export class DataManager {
     }
 
     static validateData(data) {
-        // Ensure it's an object and not an array
         if (typeof data !== 'object' || Array.isArray(data) || data === null) {
             return false;
         }
-        // Basic validation: keys and values should be strings
         for (const [key, value] of Object.entries(data)) {
-            if (typeof key !== 'string' || typeof value !== 'string') {
+            if (typeof key !== 'string' || typeof value !== 'object' || value === null) {
+                return false;
+            }
+            if (typeof value.trackId !== 'string' || typeof value.trivia !== 'string') {
                 return false;
             }
         }
