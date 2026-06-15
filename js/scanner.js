@@ -24,9 +24,8 @@ export function startScanner(onScanSuccessCb) {
     );
 
     html5QrcodeScanner.render((decodedText) => {
-        const trackId = extractSpotifyId(decodedText);
-        if (trackId) {
-            onScanSuccessCb(trackId);
+        if (decodedText) {
+            onScanSuccessCb(decodedText);
         }
     }, (error) => {
         // ignore continuous scan failures

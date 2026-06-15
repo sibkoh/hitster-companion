@@ -1,0 +1,79 @@
+export class DataManager {
+    static STORAGE_KEY = 'hitster_custom_cards';
+
+    static async initialize() {
+        if (!localStorage.getItem(this.STORAGE_KEY)) {
+            try {
+                const response = await fetch('data/default_cards.json');
+                if (response.ok) {
+                    const data = await response.json();
+                    this.saveAll(data);
+                    console.log("Default cards loaded.");
+                }
+            } catch (error) {
+                console.error("Failed to load default cards", error);
+                this.saveAll({});
+            }
+        }
+    }
+
+    static getAll() {
+        const data = localStorage.getItem(this.STORAGE_KEY);
+        return data ? JSON.parse(data) : {};
+    }
+
+    static saveAll(data) {
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
+    }
+
+    static getTrackId(scannedText) {
+        const data = this.getAll();
+        return data[scannedText] || null;
+    }
+
+    static exportData() {
+        const data = this.getAll();
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", "hitster_custom_cards.json");
+        document.body.appendChild(downloadAnchorNode); // required for firefox
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+    }
+
+    static importData(file, onCompleteCallback) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                const importedData = JSON.parse(event.target.result);
+                if (this.validateData(importedData)) {
+                    this.saveAll(importedData);
+                    alert("¡Colección importada correctamente!");
+                    if (onCompleteCallback) onCompleteCallback(true);
+                } else {
+                    alert("Formato de archivo incorrecto. Asegúrate de que sea un JSON válido { 'ID': 'SpotifyID' }.");
+                    if (onCompleteCallback) onCompleteCallback(false);
+                }
+            } catch (e) {
+                alert("Error al procesar el archivo JSON.");
+                if (onCompleteCallback) onCompleteCallback(false);
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    static validateData(data) {
+        // Ensure it's an object and not an array
+        if (typeof data !== 'object' || Array.isArray(data) || data === null) {
+            return false;
+        }
+        // Basic validation: keys and values should be strings
+        for (const [key, value] of Object.entries(data)) {
+            if (typeof key !== 'string' || typeof value !== 'string') {
+                return false;
+            }
+        }
+        return true;
+    }
+}

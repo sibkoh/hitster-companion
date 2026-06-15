@@ -2,8 +2,12 @@ import { loginWithSpotify, handleCallback, getAccessToken, logout } from './auth
 import { initializePlayer, playTrack, pauseTrack, getTrackMetadata } from './player.js';
 import { startScanner, pauseScanner, resumeScanner } from './scanner.js';
 import { CONFIG } from './config.js';
+import { DataManager } from './dataManager.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
+    // Initialize data manager
+    await DataManager.initialize();
+
     // 1. Check for Auth callback
     const hasCallback = await handleCallback();
 
@@ -47,9 +51,25 @@ function setupGame() {
         }
     });
 
-    async function onTrackScanned(trackId) {
+    async function onTrackScanned(decodedText) {
+        console.log("Scanned Text:", decodedText);
+        
+        // 1. Check DataManager cache first
+        let trackId = DataManager.getTrackId(decodedText);
+        
+        // 2. If not in cache, fallback to checking if it's a raw Spotify URL
+        if (!trackId) {
+            const regex = /(?:track\/|spotify:track:)([a-zA-Z0-9]+)/i;
+            const match = decodedText.match(regex);
+            if (match) trackId = match[1];
+        }
+
+        if (!trackId) {
+            statusText.textContent = "Tarjeta no reconocida.";
+            return;
+        }
+
         currentTrackId = trackId;
-        console.log("Scanned ID:", trackId);
 
         // Pause scanning to avoid multiple triggers
         pauseScanner();
@@ -101,4 +121,31 @@ function setupGame() {
         if (playbackTimeout) clearTimeout(playbackTimeout);
         resumeScanner();
     });
+
+    // Data Management Listeners
+    const btnExport = document.getElementById('btn-export');
+    const btnImportTrigger = document.getElementById('btn-import-trigger');
+    const fileImport = document.getElementById('file-import');
+
+    if (btnExport) {
+        btnExport.addEventListener('click', () => {
+            DataManager.exportData();
+        });
+    }
+
+    if (btnImportTrigger && fileImport) {
+        btnImportTrigger.addEventListener('click', () => {
+            fileImport.click();
+        });
+
+        fileImport.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                DataManager.importData(file, (success) => {
+                    // Reset input so the same file can be selected again
+                    fileImport.value = '';
+                });
+            }
+        });
+    }
 }
