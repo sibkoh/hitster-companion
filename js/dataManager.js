@@ -33,13 +33,21 @@ export class DataManager {
 
     static exportData() {
         const data = this.getAll();
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
+        const jsonString = JSON.stringify(data, null, 2);
+        const blob = new Blob([jsonString], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        
         const downloadAnchorNode = document.createElement('a');
-        downloadAnchorNode.setAttribute("href", dataStr);
-        downloadAnchorNode.setAttribute("download", "hitster_custom_cards.json");
-        document.body.appendChild(downloadAnchorNode); // required for firefox
+        downloadAnchorNode.href = url;
+        downloadAnchorNode.download = "hitster_custom_cards.json";
+        
+        document.body.appendChild(downloadAnchorNode);
         downloadAnchorNode.click();
-        downloadAnchorNode.remove();
+        
+        setTimeout(() => {
+            document.body.removeChild(downloadAnchorNode);
+            window.URL.revokeObjectURL(url);
+        }, 100);
     }
 
     static importData(file, onCompleteCallback) {
