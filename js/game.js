@@ -66,14 +66,20 @@ function setupGame() {
         let trackId = null;
         currentTrivia = null;
 
-        if (cardData && cardData.trackId) {
+        if (cardData && typeof cardData === 'object' && cardData.trackId) {
             trackId = cardData.trackId;
             currentTrivia = cardData.trivia || null;
         } else {
             // 2. Fallback to checking if it's a raw Spotify URL
             const regex = /(?:track\/|spotify:track:)([a-zA-Z0-9]+)/i;
             const match = decodedText.match(regex);
-            if (match) trackId = match[1];
+            if (match) {
+                trackId = match[1];
+            }
+        }
+
+        if (trackId && !currentTrivia) {
+            currentTrivia = DataManager.getTriviaByTrackId(trackId);
         }
 
         if (!trackId) {

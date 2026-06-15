@@ -2,7 +2,21 @@ export class DataManager {
     static STORAGE_KEY = 'hitster_custom_cards';
 
     static async initialize() {
-        if (!localStorage.getItem(this.STORAGE_KEY)) {
+        const stored = localStorage.getItem(this.STORAGE_KEY);
+        let needsReset = false;
+        
+        if (stored) {
+            try {
+                const data = JSON.parse(stored);
+                // Check if it's old format (string values)
+                const firstValue = Object.values(data)[0];
+                if (firstValue && typeof firstValue === 'string') {
+                    needsReset = true;
+                }
+            } catch(e) { needsReset = true; }
+        }
+        
+        if (!stored || needsReset) {
             try {
                 const response = await fetch('data/default_cards.json');
                 if (response.ok) {
@@ -29,6 +43,16 @@ export class DataManager {
     static getCardData(scannedText) {
         const data = this.getAll();
         return data[scannedText] || null;
+    }
+
+    static getTriviaByTrackId(trackId) {
+        const data = this.getAll();
+        for (const [key, value] of Object.entries(data)) {
+            if (value && typeof value === 'object' && value.trackId === trackId) {
+                return value.trivia;
+            }
+        }
+        return null;
     }
 
     static exportData() {
