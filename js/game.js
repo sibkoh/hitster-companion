@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 let currentTrackId = null;
-let currentTrivia = null;
+let currentCardData = null;
 let playbackTimeout = null;
 let currentSegment = 0; // 0=0%, 1=25%, 2=50%
 let trackDurationMs = 0;
@@ -49,6 +49,84 @@ function setupGame() {
     const metadataDisplay = document.getElementById('metadata-display');
     const readerContainer = document.getElementById('reader-container');
     const trackTrivia = document.getElementById('track-trivia');
+    
+    // Nodos de los nuevos metadatos
+    const categoryButtonsContainer = document.getElementById('category-buttons');
+    const infoBox = document.getElementById('info-box');
+    const categoryBtns = document.querySelectorAll('.btn-category');
+
+    function updateCategoryUI(category) {
+        // Update active button
+        categoryBtns.forEach(btn => {
+            if (btn.dataset.category === category) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+
+        // Update info box class
+        infoBox.className = 'glass-panel cat-' + category; // reset hidden
+
+        // Determine content
+        let contentHtml = '';
+        if (!currentCardData) {
+            contentHtml = 'Datos no disponibles.';
+        } else {
+            switch(category) {
+                case 'trivia':
+                    let t = currentCardData.trivia;
+                    if (Array.isArray(t) && t.length > 0) {
+                        // Keep the same random trivia for the whole scan
+                        if (!currentCardData.selectedTrivia) {
+                            currentCardData.selectedTrivia = t[Math.floor(Math.random() * t.length)];
+                        }
+                        t = currentCardData.selectedTrivia;
+                    }
+                    contentHtml = `<span class="info-title">💡 Anécdota</span>${t || 'Sin anécdotas disponibles.'}`;
+                    break;
+                case 'one_hit':
+                    const isOhw = currentCardData.is_one_hit_wonder;
+                    contentHtml = `<span class="info-title">🌠 One-Hit Wonder: ${isOhw ? 'SÍ' : 'NO'}</span>${currentCardData.comentario_one_hit || 'Faltan metadatos profundos. ¡Ejecuta el script!'}`;
+                    break;
+                case 'cine':
+                    const isCine = currentCardData.is_cinematografica;
+                    contentHtml = `<span class="info-title">🎬 Cinematográfica: ${isCine ? 'SÍ' : 'NO'}</span>${currentCardData.pelicula_nombre ? 'Película: ' + currentCardData.pelicula_nombre : 'No destaca en películas famosas.'}`;
+                    break;
+                case 'karaoke':
+                    const isKar = currentCardData.is_karaoke_dios;
+                    contentHtml = `<span class="info-title">🎤 Karaoke Nivel Dios: ${isKar ? 'SÍ' : 'NO'}</span>${currentCardData.comentario_karaoke || 'Sin datos.'}`;
+                    break;
+                case 'cierre':
+                    const isCierre = currentCardData.is_cierra_discotecas;
+                    contentHtml = `<span class="info-title">🕺 Cierra-Discotecas: ${isCierre ? 'SÍ' : 'NO'}</span>${currentCardData.comentario_cierre || 'Sin datos.'}`;
+                    break;
+                case 'vivo':
+                    const isVivo = currentCardData.is_artista_vivo;
+                    let textVivo = '';
+                    if (isVivo === undefined) {
+                        textVivo = 'Sin datos.';
+                    } else if (isVivo) {
+                        textVivo = 'El artista sigue vivo.';
+                    } else {
+                        textVivo = `Falleció en ${currentCardData.anio_fallecimiento || '?'}. Causa: ${currentCardData.causa_fallecimiento || 'Desconocida'}.`;
+                    }
+                    contentHtml = `<span class="info-title">🪦 ¿Sigue Vivo?: ${isVivo === undefined ? '?' : (isVivo ? 'SÍ' : 'NO')}</span>${textVivo}`;
+                    break;
+                case 'anuncio':
+                    const isAnuncio = currentCardData.is_de_anuncio;
+                    contentHtml = `<span class="info-title">📺 De Anuncio: ${isAnuncio ? 'SÍ' : 'NO'}</span>${currentCardData.marca_comercial ? 'Marca: ' + currentCardData.marca_comercial : 'Sin vinculación publicitaria destacada.'}`;
+                    break;
+            }
+        }
+        trackTrivia.innerHTML = contentHtml;
+    }
+
+    categoryBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            updateCategoryUI(e.currentTarget.dataset.category);
+        });
+    });
 
     // Initialize player
     initializePlayer((isReady) => {
@@ -64,11 +142,11 @@ function setupGame() {
         // 1. Check DataManager cache first
         let cardData = DataManager.getCardData(decodedText);
         let trackId = null;
-        currentTrivia = null;
+        currentCardData = null;
 
         if (cardData && typeof cardData === 'object' && cardData.trackId) {
             trackId = cardData.trackId;
-            currentTrivia = cardData.trivia || null;
+            currentCardData = cardData;
         } else {
             // 2. Fallback to checking if it's a raw Spotify URL
             const regex = /(?:track\/|spotify:track:)([a-zA-Z0-9]+)/i;
@@ -78,21 +156,17 @@ function setupGame() {
             }
         }
 
-        if (trackId && !currentTrivia) {
-            currentTrivia = DataManager.getTriviaByTrackId(trackId);
-            
-            // Fallback para pruebas: Si la canción escaneada no está en el JSON, mostramos una genérica.
-            if (!currentTrivia) {
-                currentTrivia = ["Dato curioso (Prueba): ¡Temazo! Añade tus anécdotas en el Gestor de Tarjetas vinculando el Track ID: " + trackId];
+        if (trackId && !currentCardData) {
+            // Intenta extraer usando card_ID
+            const rawCard = DataManager.getCardData(trackId) || DataManager.getCardData(`card_${trackId}`);
+            if (rawCard && rawCard.trackId) {
+                currentCardData = rawCard;
+            } else {
+                // Fallback para pruebas
+                currentCardData = {
+                    trivia: ["Dato curioso (Prueba): ¡Temazo! Añade tus anécdotas en el Gestor de Tarjetas vinculando el Track ID: " + trackId]
+                };
             }
-        }
-
-        // Seleccionar una anécdota al azar si es una lista
-        if (Array.isArray(currentTrivia) && currentTrivia.length > 0) {
-            const randomIndex = Math.floor(Math.random() * currentTrivia.length);
-            currentTrivia = currentTrivia[randomIndex];
-        } else if (typeof currentTrivia !== 'string') {
-            currentTrivia = null;
         }
 
         if (!trackId) {
@@ -114,6 +188,10 @@ function setupGame() {
         btnNext.classList.add('hidden');
         playbackControls.classList.remove('hidden');
         btnNextSegment.disabled = false;
+        
+        // Hide buttons until revealed
+        categoryButtonsContainer.classList.add('hidden');
+        infoBox.classList.add('hidden');
 
         statusText.textContent = "Preparando pista...";
 
@@ -188,11 +266,10 @@ function setupGame() {
             }
         }
 
-        if (currentTrivia) {
-            trackTrivia.textContent = currentTrivia;
-            trackTrivia.classList.remove('hidden');
-        } else {
-            trackTrivia.classList.add('hidden');
+        if (currentCardData) {
+            categoryButtonsContainer.classList.remove('hidden');
+            infoBox.classList.remove('hidden');
+            updateCategoryUI('trivia');
         }
 
         metadataDisplay.classList.remove('hidden');
@@ -204,7 +281,7 @@ function setupGame() {
         gameContainer.classList.add('hidden');
         readerContainer.classList.remove('hidden');
         currentTrackId = null;
-        currentTrivia = null;
+        currentCardData = null;
         if (playbackTimeout) clearTimeout(playbackTimeout);
         gameContainer.classList.remove('is-playing');
         resumeScanner();

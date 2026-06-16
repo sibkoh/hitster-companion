@@ -50,7 +50,20 @@
                 <h2 id="track-title">Title</h2>
                 <p id="track-artist">Artist</p>
                 <p id="track-year" style="color: var(--accent-color); font-weight: 700; font-size: 1.4rem; margin: 8px 0;"></p>
-                <p id="track-trivia" class="hidden"></p>
+                <!-- Category selection buttons for game master -->
+                <div id="category-buttons" class="hidden" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 15px 0;">
+                    <button class="btn-category" data-category="trivia">💡 Anécdota</button>
+                    <button class="btn-category" data-category="one_hit">🌠 One-Hit</button>
+                    <button class="btn-category" data-category="cine">🎬 Cine</button>
+                    <button class="btn-category" data-category="karaoke">🎤 Karaoke</button>
+                    <button class="btn-category" data-category="cierre">🕺 Cierre</button>
+                    <button class="btn-category" data-category="vivo">🪦 ¿Vivo?</button>
+                    <button class="btn-category" data-category="anuncio">📺 Anuncio</button>
+                </div>
+
+                <div id="info-box" class="hidden">
+                    <p id="track-trivia"></p>
+                </div>
             </div>
             
             <button id="btn-next" class="btn hidden" style="margin-top: 20px;">Next Scan</button>
