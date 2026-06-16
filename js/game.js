@@ -172,6 +172,7 @@ function setupGame() {
         }
 
         if (!trackId) {
+            alert("No reconocido. El escáner ha leído exactamente esto:\n" + decodedText);
             statusText.textContent = "Tarjeta no reconocida.";
             return;
         }
