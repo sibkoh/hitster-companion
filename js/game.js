@@ -128,11 +128,13 @@ function setupGame() {
         });
     });
 
-    // Initialize player
+    // Iniciar el escáner inmediatamente para pedir permisos de cámara rápido
+    startScanner(onTrackScanned);
+
+    // Initialize player en paralelo
     initializePlayer((isReady) => {
         if (isReady) {
-            // Player is ready, start scanner
-            startScanner(onTrackScanned);
+            console.log("Spotify Player is ready.");
         }
     });
 
