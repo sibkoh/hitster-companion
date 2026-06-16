@@ -7,39 +7,46 @@ function extractSpotifyId(url) {
     return match ? match[1] : null;
 }
 
-let html5QrcodeScanner = null;
+let html5QrCode = null;
 
 export function startScanner(onScanSuccessCb) {
-    if (html5QrcodeScanner) return; // Already running
+    if (html5QrCode) return; // Already running
     
-    html5QrcodeScanner = new window.Html5QrcodeScanner(
-        "reader",
-        { 
-            fps: 10, 
-            qrbox: { width: 250, height: 250 },
-            aspectRatio: 1.0,
-            supportedScanTypes: [window.Html5QrcodeScanType.SCAN_TYPE_CAMERA]
-        },
-        false
-    );
+    html5QrCode = new window.Html5Qrcode("reader");
 
-    html5QrcodeScanner.render((decodedText) => {
-        if (decodedText) {
-            onScanSuccessCb(decodedText);
+    const config = {
+        fps: 10,
+        qrbox: { width: 250, height: 250 },
+        aspectRatio: 1.0
+    };
+
+    // Esto fuerza el arranque automático usando la cámara trasera (environment)
+    html5QrCode.start(
+        { facingMode: "environment" },
+        config,
+        (decodedText) => {
+            // on success
+            if (decodedText) {
+                onScanSuccessCb(decodedText);
+            }
+        },
+        (errorMessage) => {
+            // ignore continuous scan failures
         }
-    }, (error) => {
-        // ignore continuous scan failures
+    ).catch((err) => {
+        console.error("Error al arrancar la cámara automáticamente:", err);
+        // Si falla (p. ej. deniegan permisos), se podría mostrar un mensaje en UI
     });
 }
 
 export function pauseScanner() {
-    if (html5QrcodeScanner) {
-        html5QrcodeScanner.pause(true);
+    if (html5QrCode && html5QrCode.isScanning) {
+        html5QrCode.pause(true);
     }
 }
 
 export function resumeScanner() {
-    if (html5QrcodeScanner) {
-        html5QrcodeScanner.resume();
+    if (html5QrCode) {
+        html5QrCode.resume();
     }
 }
