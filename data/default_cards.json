@@ -1,14 +1,34 @@
 {
   "card_001": {
-    "trackId": "4cOdK2wGLETKBW3PvgPWqT",
-    "trivia": "Esta canción fue un éxito rotundo en la década de los 80."
+    "trackId": "4u7EnebtmKWzUH433cf5Qv",
+    "trivia": [
+      "Freddy Mercury compuso esta obra maestra en su piano casero.",
+      "La canción no tiene un estribillo tradicional.",
+      "Originalmente, los ejecutivos discográficos pensaban que era demasiado larga para la radio."
+    ]
   },
   "card_002": {
-    "trackId": "3n3Ppam7vgaVa1iaRUc9Lp",
-    "trivia": "El artista compuso este tema en menos de 15 minutos."
+    "trackId": "5ChkMS8OtdzJeqyyEEQEM",
+    "trivia": [
+      "Michael Jackson estrenó su famoso paso 'Moonwalk' interpretando esta canción.",
+      "La canción fue casi descartada del álbum 'Thriller'.",
+      "El productor Quincy Jones no quería que la canción tuviera una introducción de bajo tan larga."
+    ]
+  },
+  "card_003": {
+    "trackId": "0aym2LBJBk9DAYuHHutrIl",
+    "trivia": [
+      "Paul McCartney escribió esta canción para consolar al hijo de John Lennon durante el divorcio de sus padres.",
+      "El título original iba a ser 'Hey Jules'.",
+      "Fue el primer lanzamiento de la discográfica de los Beatles, Apple Records."
+    ]
   },
   "hitster:card:001": {
-    "trackId": "11dFghVXANMlKmJXsNCbNl",
-    "trivia": "Considerada una de las mejores canciones de rock alternativo."
+    "trackId": "2WfaOiMkCvy7F5fcp2zZ8L",
+    "trivia": [
+      "El legendario videoclip tardó 16 semanas en ser dibujado a mano.",
+      "La canción fracasó dos veces antes de convertirse en un éxito mundial en su tercer lanzamiento.",
+      "La melodía del teclado principal la compuso el tecladista cuando apenas tenía 15 años."
+    ]
   }
 }

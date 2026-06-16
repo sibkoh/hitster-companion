@@ -60,7 +60,7 @@ function setupGame() {
 
     async function onTrackScanned(decodedText) {
         console.log("Scanned Text:", decodedText);
-        
+
         // 1. Check DataManager cache first
         let cardData = DataManager.getCardData(decodedText);
         let trackId = null;
@@ -83,8 +83,16 @@ function setupGame() {
             
             // Fallback para pruebas: Si la canción escaneada no está en el JSON, mostramos una genérica.
             if (!currentTrivia) {
-                currentTrivia = "Dato curioso (Prueba): ¡Temazo! Añade tu anécdota real en el Gestor de Tarjetas vinculando el Track ID: " + trackId;
+                currentTrivia = ["Dato curioso (Prueba): ¡Temazo! Añade tus anécdotas en el Gestor de Tarjetas vinculando el Track ID: " + trackId];
             }
+        }
+
+        // Seleccionar una anécdota al azar si es una lista
+        if (Array.isArray(currentTrivia) && currentTrivia.length > 0) {
+            const randomIndex = Math.floor(Math.random() * currentTrivia.length);
+            currentTrivia = currentTrivia[randomIndex];
+        } else if (typeof currentTrivia !== 'string') {
+            currentTrivia = null;
         }
 
         if (!trackId) {
@@ -98,7 +106,7 @@ function setupGame() {
         // Pause scanning to avoid multiple triggers
         pauseScanner();
         readerContainer.classList.add('hidden');
-        
+
         // Setup UI for blind play
         gameContainer.classList.remove('hidden');
         metadataDisplay.classList.add('hidden');
@@ -106,7 +114,7 @@ function setupGame() {
         btnNext.classList.add('hidden');
         playbackControls.classList.remove('hidden');
         btnNextSegment.disabled = false;
-        
+
         statusText.textContent = "Preparando pista...";
 
         // Fetch duration before playing
@@ -122,7 +130,7 @@ function setupGame() {
 
     async function playSegment(segmentIndex) {
         if (playbackTimeout) clearTimeout(playbackTimeout);
-        
+
         let positionMs = 0;
         if (segmentIndex === 1) positionMs = Math.floor(trackDurationMs * 0.25);
         if (segmentIndex === 2) positionMs = Math.floor(trackDurationMs * 0.50);
@@ -159,12 +167,12 @@ function setupGame() {
 
     btnReveal.addEventListener('click', async () => {
         if (!currentTrackId) return;
-        
+
         stopPlayback();
         playbackControls.classList.add('hidden');
         btnReveal.classList.add('hidden');
         statusText.textContent = "¡Revelado!";
-        
+
         // Fetch metadata
         const metadata = await getTrackMetadata(currentTrackId);
         if (metadata) {
@@ -174,14 +182,14 @@ function setupGame() {
                 document.getElementById('track-cover').src = metadata.album.images[0].url;
             }
         }
-        
+
         if (currentTrivia) {
             trackTrivia.textContent = currentTrivia;
             trackTrivia.classList.remove('hidden');
         } else {
             trackTrivia.classList.add('hidden');
         }
-        
+
         metadataDisplay.classList.remove('hidden');
         btnNext.classList.remove('hidden');
     });

@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Hitster Companion</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
     <!-- CSS -->
     <link rel="stylesheet" href="css/style.css">
     
@@ -24,12 +29,12 @@
     <div id="app-content" class="hidden">
         <button id="btn-logout" class="btn" style="position:absolute; top:10px; right:10px; font-size:0.7rem; padding: 6px 12px;">Logout</button>
         
-        <div id="reader-container">
+        <div id="reader-container" class="glass-panel">
             <div id="reader"></div>
         </div>
         
         <!-- Game Play & Reveal View -->
-        <div id="game-container" class="hidden">
+        <div id="game-container" class="glass-panel hidden">
             <div id="status-text" class="status-text">Ready</div>
             
             <!-- Playback Controls -->

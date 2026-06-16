@@ -8,10 +8,14 @@ export class DataManager {
         if (stored) {
             try {
                 const data = JSON.parse(stored);
-                // Check if it's old format (string values)
+                // Check if it's old format (string values or trivia is string)
                 const firstValue = Object.values(data)[0];
-                if (firstValue && typeof firstValue === 'string') {
-                    needsReset = true;
+                if (firstValue) {
+                    if (typeof firstValue === 'string') {
+                        needsReset = true;
+                    } else if (typeof firstValue === 'object' && !Array.isArray(firstValue.trivia)) {
+                        needsReset = true;
+                    }
                 }
             } catch(e) { needsReset = true; }
         }
@@ -103,7 +107,7 @@ export class DataManager {
             if (typeof key !== 'string' || typeof value !== 'object' || value === null) {
                 return false;
             }
-            if (typeof value.trackId !== 'string' || typeof value.trivia !== 'string') {
+            if (typeof value.trackId !== 'string' || !Array.isArray(value.trivia)) {
                 return false;
             }
         }
