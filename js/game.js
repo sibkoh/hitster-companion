@@ -181,6 +181,11 @@ function setupGame() {
             if (metadata.album && metadata.album.images.length > 0) {
                 document.getElementById('track-cover').src = metadata.album.images[0].url;
             }
+            if (metadata.album && metadata.album.release_date) {
+                document.getElementById('track-year').textContent = metadata.album.release_date.substring(0, 4);
+            } else {
+                document.getElementById('track-year').textContent = "";
+            }
         }
 
         if (currentTrivia) {

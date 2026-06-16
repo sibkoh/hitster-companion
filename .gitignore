@@ -45,3 +45,5 @@ application-secret.properties
 # ==========================================
 .DS_Store
 Thumbs.db
+.env
+node_modules/
