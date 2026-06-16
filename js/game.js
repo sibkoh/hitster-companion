@@ -148,6 +148,21 @@ function setupGame() {
 
         // 1. Check DataManager cache first
         let cardData = DataManager.getCardData(decodedText);
+        
+        // 1.b Fallback extra fuerte para tarjetas oficiales: extraer el número final "00096"
+        if (!cardData) {
+            const hitsterMatch = decodedText.match(/hitstergame\.com.*\/(\d{5})/i);
+            if (hitsterMatch) {
+                const cardIdStr = hitsterMatch[1]; // "00096"
+                // Buscar en todo el DataManager una llave que termine con ese número
+                const allCards = DataManager.getAll();
+                const foundKey = Object.keys(allCards).find(k => k.endsWith('/' + cardIdStr));
+                if (foundKey) {
+                    cardData = allCards[foundKey];
+                }
+            }
+        }
+
         let trackId = null;
         currentCardData = null;
 
