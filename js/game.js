@@ -141,6 +141,11 @@ function setupGame() {
     async function onTrackScanned(decodedText) {
         console.log("Scanned Text:", decodedText);
 
+        // Normalizar URL (el QR físico no lleva http://)
+        if (decodedText.startsWith('www.hitstergame.com')) {
+            decodedText = 'http://' + decodedText;
+        }
+
         // 1. Check DataManager cache first
         let cardData = DataManager.getCardData(decodedText);
         let trackId = null;
